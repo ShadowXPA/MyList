@@ -11,7 +11,7 @@ using MyList.Server.Data;
 namespace MyList.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240925135345_InitialCreate")]
+    [Migration("20240925162409_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

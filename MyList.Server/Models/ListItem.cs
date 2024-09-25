@@ -6,9 +6,11 @@ namespace MyList.Server.Models
     {
         [Key]
         public int Id { get; set; }
-        public required string Name { get; set; }
+        [Required]
+        public string? Name { get; set; }
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public required UserList List { get; set; }
+        [Required]
+        public UserList? List { get; set; }
     }
 }

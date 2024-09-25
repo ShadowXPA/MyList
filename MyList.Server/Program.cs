@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using MyList.Server.Data;
+using MyList.Server.Data.Repositories;
+using MyList.Server.Services;
+using System.Text.Json.Serialization;
 
 namespace MyList.Server
 {
@@ -9,11 +12,18 @@ namespace MyList.Server
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                });
 
             var connectionString = builder.Configuration.GetConnectionString("MyList");
 
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+
+            builder.Services.AddScoped<IListRepository, ListRepository>();
+            builder.Services.AddScoped<IListService, ListService>();
 
             var app = builder.Build();
 
