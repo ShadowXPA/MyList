@@ -1,3 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using MyList.Server.Data;
+using MyList.Server.Data.Repositories;
+using MyList.Server.Services;
+using System.Text.Json.Serialization;
+
 namespace MyList.Server
 {
     public class Program
@@ -6,18 +12,24 @@ namespace MyList.Server
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                });
 
-            builder.Services.AddControllers();
+            var connectionString = builder.Configuration.GetConnectionString("MyList");
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+
+            builder.Services.AddScoped<IListRepository, ListRepository>();
+            builder.Services.AddScoped<IListService, ListService>();
 
             var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
