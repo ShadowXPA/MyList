@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using MyList.Server.Data;
+
 namespace MyList.Server
 {
     public class Program
@@ -6,18 +9,17 @@ namespace MyList.Server
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
 
-            var app = builder.Build();
+            var connectionString = builder.Configuration.GetConnectionString("MyList");
 
-            // Configure the HTTP request pipeline.
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+
+            var app = builder.Build();
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
