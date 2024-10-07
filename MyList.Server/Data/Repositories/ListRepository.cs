@@ -54,6 +54,7 @@ namespace MyList.Server.Data.Repositories
 
             dbList.Name = list.Name ?? dbList.Name;
             dbList.Description = list.Description ?? dbList.Description;
+            dbList.Description = dbList.Description == string.Empty ? null : dbList.Description;
             dbList.UpdatedAt = list.UpdatedAt ?? DateTime.UtcNow;
 
             var updated = await _db.SaveChangesAsync();
@@ -89,6 +90,7 @@ namespace MyList.Server.Data.Repositories
                 return null;
             }
 
+            list.UpdatedAt = DateTime.UtcNow;
             list.Items.Add(item);
             item.List = list;
 
@@ -117,6 +119,7 @@ namespace MyList.Server.Data.Repositories
                 return false;
             }
 
+            list.UpdatedAt = DateTime.UtcNow;
             list.Items.Remove(item);
             item.List = null;
 

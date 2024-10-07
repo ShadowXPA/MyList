@@ -61,7 +61,7 @@ namespace MyList.Server.Services
                 list.Name = listDto.Name;
             }
 
-            if (!string.IsNullOrWhiteSpace(listDto.Description))
+            if (listDto.Description != null)
             {
                 list.Description = listDto.Description;
             }
