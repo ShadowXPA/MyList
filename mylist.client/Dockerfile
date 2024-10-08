@@ -14,7 +14,7 @@ RUN npm install --production
 COPY . .
 
 # Override runtime config
-ENV API_BASE_URL=http://mylist-server/mylist-api/**
+ENV API_BASE_URL=http://mylist-server:8080/mylist-api/**
 
 # Expose the port that your app runs on
 EXPOSE 3000
