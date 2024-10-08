@@ -130,7 +130,7 @@ const deleteSelectedList = async () => {
             <div>
                 <label for="list-description">Description:</label>
                 <textarea id="list-description" name="description" v-model="newList.description" type="text"
-                    class="mt-1 block w-full border rounded shadow-sm focus:border-gray-500 focus:ring focus:ring-sky-300 focus:ring-opacity-50"></textarea>
+                    class="transition-none mt-1 block w-full border rounded shadow-sm focus:border-gray-500 focus:ring focus:ring-sky-300 focus:ring-opacity-50"></textarea>
             </div>
         </div>
 
