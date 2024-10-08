@@ -3,7 +3,7 @@ import type { UserList } from '~/types/myList'
 import { parseDate } from '~/utils/dateUtils'
 
 const runtimeConfig = useRuntimeConfig()
-const { data: lists, refresh, status, error } = await useFetch<UserList[]>(`${runtimeConfig.public.apiBaseUrl}/api/lists`)
+const { data: lists, refresh, status, error } = await useFetch<UserList[]>(`${runtimeConfig.public.apiBaseURL}/api/lists`)
 
 const newListModal = ref(false)
 const newList = ref<{ name: string, description?: string }>({ name: '' })
@@ -28,7 +28,7 @@ const addNewList = async () => {
         return
     }
 
-    const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseUrl}/api/lists`,
+    const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseURL}/api/lists`,
         {
             method: 'post',
             body: newList.value
@@ -69,7 +69,7 @@ const deleteSelectedList = async () => {
         return
     }
 
-    await $fetch(`${runtimeConfig.public.apiBaseUrl}/api/lists/${deleteList.value.id}`, { method: 'delete' })
+    await $fetch(`${runtimeConfig.public.apiBaseURL}/api/lists/${deleteList.value.id}`, { method: 'delete' })
 
     lists.value = lists.value.filter((list) => list.id !== deleteList.value.id)
 

@@ -4,7 +4,7 @@ const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const id = route.params.id
 
-const { data: list, refresh, status, error } = await useFetch<UserList>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${id}?include-items=true`)
+const { data: list, refresh, status, error } = await useFetch<UserList>(`${runtimeConfig.public.apiBaseURL}/api/lists/${id}?include-items=true`)
 
 const newItemModal = ref(false)
 const newItem = ref<{ name: string, description?: string }>({ name: '' })
@@ -31,7 +31,7 @@ const addNewItem = async () => {
         return
     }
 
-    const data = await $fetch<ListItem>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${list.value.id}/items`,
+    const data = await $fetch<ListItem>(`${runtimeConfig.public.apiBaseURL}/api/lists/${list.value.id}/items`,
         {
             method: 'post',
             body: newItem.value
@@ -76,7 +76,7 @@ const editCurrentList = async () => {
         return
     }
 
-    const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${list.value?.id}`,
+    const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseURL}/api/lists/${list.value?.id}`,
         {
             method: 'patch',
             body: editList.value
@@ -104,7 +104,7 @@ const deleteSelectedItem = async () => {
         return
     }
 
-    await $fetch<ListItem>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${list.value.id}/items/${deleteItem.value.id}`, { method: 'delete' })
+    await $fetch<ListItem>(`${runtimeConfig.public.apiBaseURL}/api/lists/${list.value.id}/items/${deleteItem.value.id}`, { method: 'delete' })
 
     list.value.items = list.value.items.filter((item) => item.id !== deleteItem.value.id)
     closeDeleteItemModal()
