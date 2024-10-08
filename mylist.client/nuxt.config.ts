@@ -12,7 +12,12 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseURL: 'http://localhost:5153/mylist-api'
+      apiBaseURL: '/mylist-api'
+    }
+  },
+  nitro: {
+    routeRules: {
+      '/mylist-api/**': { proxy: import.meta.env.API_BASE_URL }
     }
   }
 })
