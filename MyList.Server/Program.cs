@@ -27,7 +27,10 @@ namespace MyList.Server
 
             var app = builder.Build();
 
-            app.UseCors(options => options.AllowAnyOrigin());
+            app.UseCors(options =>
+                options.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
 
             app.UseAuthorization();
 
