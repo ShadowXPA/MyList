@@ -27,6 +27,8 @@ namespace MyList.Server
 
             var app = builder.Build();
 
+            app.UsePathBase("/mylist-api");
+
             app.UseCors(options =>
                 options.AllowAnyOrigin()
                     .AllowAnyMethod()

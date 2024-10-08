@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseURL: 'http://localhost:5153'
+      apiBaseURL: 'http://localhost:5153/mylist-api'
     }
   }
 })
