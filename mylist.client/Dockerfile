@@ -13,6 +13,9 @@ RUN npm install --production
 # Copy the rest of the application code
 COPY . .
 
+# Override runtime config
+ENV NUXT_PUBLIC_API_BASE_URL=
+
 # Expose the port that your app runs on
 EXPOSE 3000
 

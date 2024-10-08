@@ -40,7 +40,7 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Expose the application port
-EXPOSE 5000
+EXPOSE 8080
 
 # Run EF migrations before starting the app
 CMD ["dotnet", "MyList.Server.dll"]
