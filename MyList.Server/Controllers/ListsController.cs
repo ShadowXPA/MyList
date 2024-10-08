@@ -52,10 +52,21 @@ namespace MyList.Server.Controllers
         }
 
         [HttpPatch("{id}")]
-        public Task EditListAsync(int id, [FromBody] EditListDTO listDto)
+        public async Task<IActionResult> EditListAsync(int id, [FromBody] EditListDTO listDto)
         {
             _logger.LogInformation("Editting list (ID: {})...", id);
-            return _listService.EditListAsync(id, listDto);
+            var list = await _listService.EditListAsync(id, listDto);
+
+            if (list == null)
+            {
+                _logger.LogWarning("List (ID: {}) was not edited", id);
+            }
+            else
+            {
+                _logger.LogInformation("List (ID: {}) was edited", list.Id);
+            }
+
+            return list == null ? BadRequest() : Ok(list);
         }
 
         [HttpDelete("{id}")]

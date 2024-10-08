@@ -40,14 +40,14 @@ namespace MyList.Server.Services
             return (await _listRepository.InsertAsync(list))?.ToDTO();
         }
 
-        public async Task EditListAsync(int id, EditListDTO listDto)
+        public async Task<ListDTO?> EditListAsync(int id, EditListDTO listDto)
         {
             var listExists = await _listRepository.ExistsAsync(id);
 
             if (!listExists)
             {
                 _logger.LogWarning("List (ID: {}) was not found", id);
-                return;
+                return null;
             }
 
             var list = new UserList()
@@ -68,7 +68,9 @@ namespace MyList.Server.Services
 
             var updated = await _listRepository.UpdateAsync(list);
 
-            _logger.LogInformation("List (ID: {}) was {}", id, (updated ? "updated" : "not updated"));
+            _logger.LogInformation("List (ID: {}) was {}", id, (updated != null ? "updated" : "not updated"));
+
+            return updated?.ToDTO();
         }
 
         public async Task DeleteListAsync(int id)

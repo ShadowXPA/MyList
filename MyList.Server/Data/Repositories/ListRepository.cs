@@ -14,7 +14,10 @@ namespace MyList.Server.Data.Repositories
 
         public Task<IEnumerable<UserList>> GetAllAsync()
         {
-            return Task.FromResult(_db.Lists.AsEnumerable());
+            return Task.FromResult(_db.Lists
+                .OrderByDescending(l => l.UpdatedAt)
+                .ThenByDescending(l => l.CreatedAt)
+                .AsEnumerable());
         }
 
         public Task<UserList?> FindAsync(int id, bool includeItems = false)
@@ -23,7 +26,7 @@ namespace MyList.Server.Data.Repositories
 
             if (includeItems)
             {
-                lists = lists.Include(l => l.Items);
+                lists = lists.Include(l => l.Items.OrderByDescending(i => i.CreatedAt));
             }
 
             return lists.Where(l => l.Id == id)
@@ -42,14 +45,14 @@ namespace MyList.Server.Data.Repositories
             return created > 0 ? newList.Entity : null;
         }
 
-        public async Task<bool> UpdateAsync(UserList list)
+        public async Task<UserList?> UpdateAsync(UserList list)
         {
-            var dbList = await _db.Lists.FindAsync(list.Id);
+            var dbList = await FindAsync(list.Id, true);
 
             if (dbList == null)
             {
                 _logger.LogWarning("List (ID: {}) not found", list.Id);
-                return false;
+                return null;
             }
 
             dbList.Name = list.Name ?? dbList.Name;
@@ -58,7 +61,7 @@ namespace MyList.Server.Data.Repositories
             dbList.UpdatedAt = list.UpdatedAt ?? DateTime.UtcNow;
 
             var updated = await _db.SaveChangesAsync();
-            return updated > 0;
+            return updated > 0 ? dbList : null;
         }
 
         public async Task<bool> DeleteAsync(int id)
