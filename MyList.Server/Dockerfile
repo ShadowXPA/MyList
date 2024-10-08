@@ -17,16 +17,6 @@ COPY . .
 # Build the application for production
 RUN dotnet publish -c Release -o /app/publish
 
-# Install EF tools (required for running migrations)
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
-
-# Create/Update the database
-RUN dotnet ef database update
-
-# Copy database into publish folder
-RUN cp *.db /app/publish
-
 # Stage 2: Use runtime image for production
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime
 

@@ -15,8 +15,10 @@ services:
     container_name: mylist-server
     networks:
       - mylist-network
+    volumes:
+      - ./data/mylist.db:/app/mylist.db
     # ports:
-    #   - "5000:5000"  # Expose the app's port if needed for local dev
+    #   - "8080:8080"  # Expose the app's port if needed for local dev
 
   mylist-client:
     build:

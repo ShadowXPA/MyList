@@ -14,7 +14,7 @@ RUN npm install --production
 COPY . .
 
 # Override runtime config
-ENV NUXT_PUBLIC_API_BASE_URL=
+ENV NUXT_PUBLIC_API_BASE_URL=/mylist-api
 
 # Expose the port that your app runs on
 EXPOSE 3000
