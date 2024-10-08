@@ -1,0 +1,32 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "1400:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - mylist-network
+
+  mylist-server:
+    build:
+      context: ./MyList.Server
+    container_name: mylist-server
+    networks:
+      - mylist-network
+    # ports:
+    #   - "5000:5000"  # Expose the app's port if needed for local dev
+
+  mylist-client:
+    build:
+      context: ./mylist.client
+    container_name: mylist-client
+    networks:
+      - mylist-network
+    # ports:
+    #   - "3000:3000"  # Expose the app's port if needed for local dev
+
+networks:
+  mylist-network:
+    driver: bridge
