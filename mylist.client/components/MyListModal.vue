@@ -2,14 +2,21 @@
 const props = defineProps<{ static?: boolean }>()
 const shown = defineModel<boolean>()
 const emit = defineEmits(['closed'])
+
+const backdropClose = () => {
+    if (!props.static) {
+        shown.value = false
+        emit('closed')
+    }
+}
 </script>
 
 <template>
-    <Body v-if="shown" style="overflow: hidden;" />
-    <Teleport to="#modals">
+    <Body v-if="shown" class="overflow-hidden" />
+    <Teleport to="#teleports">
         <Transition name="slide">
-            <div v-if="shown" class="modal fixed w-full h-full overflow-auto backdrop-brightness-50 z-[1055]"
-                @click.self="() => { if (!props.static) { shown = false; emit('closed') } }">
+            <div v-if="shown" class="modal fixed w-full h-full overflow-auto backdrop-brightness-50 left-0 top-0 z-[1055]"
+                @click.self="backdropClose">
                 <div class="modal-dialog relative max-w-xl my-10 mx-4 sm:mx-auto">
                     <div class="modal-content bg-white rounded shadow-lg">
                         <div class="modal-header p-2 border-b flex gap-2 items-center">

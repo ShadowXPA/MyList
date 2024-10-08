@@ -9,6 +9,8 @@ const newListModal = ref(false)
 const newList = ref<{ name: string, description?: string }>({ name: '' })
 const deleteListModal = ref(false)
 const deleteList = ref<{ id: number, name: string }>({ id: 0, name: '' })
+const errorModal = ref(false)
+const errorMsg = ref<string>()
 
 const onCloseNewListModal = () => {
     newList.value.name = ''
@@ -20,9 +22,34 @@ const closeNewListModal = () => {
     onCloseNewListModal()
 }
 
-const addNewList = () => {
-    // TODO: add new list, if successful refresh data, close modal, etc.
+const addNewList = async () => {
+    if (!lists.value) {
+        closeNewListModal()
+        return
+    }
 
+    const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseUrl}/api/lists`,
+        {
+            method: 'post',
+            body: newList.value
+        }
+    ).catch((error) => {
+        let msg = `An error occured while adding new list:\n(${error.data.status}) ${error.data.title}\n`
+
+        for (let i in error.data.errors) {
+            for (let err of error.data.errors[i]) {
+                msg += `\n${err}`
+            }
+        }
+
+        errorMsg.value = msg
+        errorModal.value = true
+    })
+
+    if (!data)
+        return
+
+    lists.value.unshift(data)
     closeNewListModal()
 }
 
@@ -36,8 +63,15 @@ const closeDeleteListModal = () => {
     onCloseDeleteListModal()
 }
 
-const deleteSelectedList = () => {
-    // TODO: delete the list, if successful refresh data, close modal, etc.
+const deleteSelectedList = async () => {
+    if (!lists.value) {
+        closeDeleteListModal()
+        return
+    }
+
+    await $fetch(`${runtimeConfig.public.apiBaseUrl}/api/lists/${deleteList.value.id}`, { method: 'delete' })
+
+    lists.value = lists.value.filter((list) => list.id !== deleteList.value.id)
 
     closeDeleteListModal()
 }
@@ -62,8 +96,9 @@ const deleteSelectedList = () => {
                         {{ parseDate(list.createdAt).toLocaleString() }}
                         <span v-if="list.updatedAt"> - {{ parseDate(list.updatedAt).toLocaleString() }}</span>
                     </p>
-                    <p v-if="list.description" class="text-ellipsis overflow-hidden whitespace-nowrap">{{
-                        list.description }}</p>
+                    <p v-if="list.description" class="text-ellipsis overflow-hidden whitespace-nowrap">
+                        {{ list.description }}
+                    </p>
                 </div>
                 <div>
                     <MyListButton icon="bi:trash" @click="(e: any) => {
@@ -118,5 +153,13 @@ const deleteSelectedList = () => {
             <MyListButton title="Delete" @click="deleteSelectedList"
                 class="bg-red-100 hover:bg-red-200 active:bg-red-300" />
         </template>
+    </MyListModal>
+
+    <MyListModal v-model="errorModal">
+        <template #header>
+            <p class="text-lg font-bold">Error!</p>
+        </template>
+
+        <div class="font-bold text-red-500 whitespace-pre-line">{{ errorMsg }}</div>
     </MyListModal>
 </template>

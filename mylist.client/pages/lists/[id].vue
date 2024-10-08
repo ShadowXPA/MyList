@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { UserList } from '~/types/myList'
+import type { ListItem, UserList } from '~/types/myList'
 const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const id = route.params.id
@@ -12,6 +12,8 @@ const editListModal = ref(false)
 const editList = ref<{ name: string, description?: string }>({ name: list.value?.name ?? '', description: list.value?.description })
 const deleteItemModal = ref(false)
 const deleteItem = ref<{ id: number, name: string }>({ id: 0, name: '' })
+const errorModal = ref(false)
+const errorMsg = ref<string>()
 
 const onCloseNewItemModal = () => {
     newItem.value.name = ''
@@ -23,10 +25,38 @@ const closeNewItemModal = () => {
     onCloseNewItemModal()
 }
 
-const addNewItem = () => {
-    // TODO: add new item, if successful refresh data, close modal, etc.
-    // TODO: change list and item descriptions to textareas!
+const addNewItem = async () => {
+    if (!list.value) {
+        closeNewItemModal()
+        return
+    }
 
+    const data = await $fetch<ListItem>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${list.value.id}/items`,
+        {
+            method: 'post',
+            body: newItem.value
+        }
+    ).catch((error) => {
+        let msg = `An error occured while adding new item:\n(${error.data.status}) ${error.data.title}\n`
+
+        for (let i in error.data.errors) {
+            for (let err of error.data.errors[i]) {
+                msg += `\n${err}`
+            }
+        }
+
+        errorMsg.value = msg
+        errorModal.value = true
+    })
+
+    if (!data)
+        return
+
+    if (!list.value.items) {
+        list.value.items = []
+    }
+
+    list.value.items.unshift(data)
     closeNewItemModal()
 }
 
@@ -40,8 +70,20 @@ const closeEditListModal = () => {
     onCloseEditListModal()
 }
 
-const editCurrentList = () => {
-    // TODO: edit current list, if successful refresh data, close modal, etc.
+const editCurrentList = async () => {
+    if (!list.value) {
+        closeEditListModal()
+        return
+    }
+
+    const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${list.value?.id}`,
+        {
+            method: 'patch',
+            body: editList.value
+        }
+    )
+
+    list.value = data
 
     closeEditListModal()
 }
@@ -56,9 +98,15 @@ const closeDeleteItemModal = () => {
     onCloseDeleteItemModal()
 }
 
-const deleteSelectedItem = () => {
-    // TODO: delete the item, if successful refresh data, close modal, etc.
+const deleteSelectedItem = async () => {
+    if (!list.value || !list.value.items) {
+        closeDeleteItemModal()
+        return
+    }
 
+    await $fetch<ListItem>(`${runtimeConfig.public.apiBaseUrl}/api/lists/${list.value.id}/items/${deleteItem.value.id}`, { method: 'delete' })
+
+    list.value.items = list.value.items.filter((item) => item.id !== deleteItem.value.id)
     closeDeleteItemModal()
 }
 </script>
@@ -68,7 +116,11 @@ const deleteSelectedItem = () => {
         <Title>{{ list.name }}</Title>
         <div class="flex flex-col gap-4">
             <h1 class="py-10 mx-auto text-5xl font-bold">{{ list.name }}</h1>
-            <p v-if="list.description">{{ list.description }}</p>
+            <p class="text-sm font-thin"><span class="font-bold">Created:</span> {{
+                parseDate(list.createdAt).toLocaleString() }}</p>
+            <p v-if="list.updatedAt" class="text-sm font-thin"><span class="font-bold">Updated:</span> {{
+                parseDate(list.updatedAt).toLocaleString() }}</p>
+            <p v-if="list.description" class="text-lg whitespace-pre-line">{{ list.description }}</p>
             <div class="flex gap-2 justify-end">
                 <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
                     class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
@@ -163,6 +215,14 @@ const deleteSelectedItem = () => {
                 <MyListButton title="Delete" @click="deleteSelectedItem"
                     class="bg-red-100 hover:bg-red-200 active:bg-red-300" />
             </template>
+        </MyListModal>
+
+        <MyListModal v-model="errorModal">
+            <template #header>
+                <p class="text-lg font-bold">Error!</p>
+            </template>
+
+            <div class="font-bold text-red-500 whitespace-pre-line">{{ errorMsg }}</div>
         </MyListModal>
     </div>
     <div v-else>
