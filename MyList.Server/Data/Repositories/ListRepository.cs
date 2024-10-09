@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyList.Server.Models;
-using System.Collections.Generic;
 
 namespace MyList.Server.Data.Repositories
 {
@@ -15,7 +14,7 @@ namespace MyList.Server.Data.Repositories
         public Task<IEnumerable<UserList>> GetAllAsync()
         {
             return Task.FromResult(_db.Lists
-                .OrderByDescending(l => l.UpdatedAt)
+                .OrderByDescending(l => l.UpdatedAt == null ? l.CreatedAt : l.UpdatedAt)
                 .ThenByDescending(l => l.CreatedAt)
                 .AsEnumerable());
         }
