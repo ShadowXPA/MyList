@@ -80,8 +80,9 @@ const deleteSelectedList = async () => {
 <template>
     <Title>Your lists</Title>
     <div class="flex flex-col gap-4">
-        <h1 class="py-10 mx-auto text-5xl font-bold">Your lists</h1>
-        <div class="flex gap-2 justify-end">
+        <h1 class="py-10 mx-auto text-5xl font-bold">My Lists</h1>
+        <p class="text-xl mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book lists, music lists, etc.)</p>
+        <div class="flex gap-2 justify-end items-center">
             <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
                 class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
             <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
@@ -91,7 +92,7 @@ const deleteSelectedList = async () => {
             <div v-for="list in lists" :key="list.id" @click.stop="navigateTo(`/lists/${list.id}`)"
                 class="p-4 flex gap-2 justify-between items-center border rounded cursor-pointer hover:bg-neutral-100 active:bg-neutral-200">
                 <div class="flex flex-col gap-1 max-w-[calc(100%-4rem)]">
-                    <p class="text-xl font-bold">{{ list.name }}</p>
+                    <p class="text-2xl font-bold">{{ list.name }}</p>
                     <p class="text-xs font-thin">
                         {{ parseDate(list.createdAt).toLocaleString() }}
                         <span v-if="list.updatedAt"> - {{ parseDate(list.updatedAt).toLocaleString() }}</span>

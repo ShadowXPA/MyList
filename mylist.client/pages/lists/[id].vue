@@ -116,11 +116,12 @@ const deleteSelectedItem = async () => {
         <Title>{{ list.name }}</Title>
         <div class="flex flex-col gap-4">
             <h1 class="py-10 mx-auto text-5xl font-bold">{{ list.name }}</h1>
-            <p class="text-sm font-thin"><span class="font-bold">Created:</span> {{
-                parseDate(list.createdAt).toLocaleString() }}</p>
-            <p v-if="list.updatedAt" class="text-sm font-thin"><span class="font-bold">Updated:</span> {{
-                parseDate(list.updatedAt).toLocaleString() }}</p>
-            <p v-if="list.description" class="text-lg whitespace-pre-line">{{ list.description }}</p>
+            <p v-if="list.description" class="text-xl whitespace-pre-line">{{ list.description }}</p>
+            <p class="text-sm ml-auto font-thin"><span class="font-bold">Created:</span> {{
+                parseDate(list.createdAt).toLocaleString() }}
+                <span v-if="list.updatedAt"><span class="font-bold">Updated:</span> {{
+                    parseDate(list.updatedAt).toLocaleString() }}</span>
+            </p>
             <div class="flex gap-2 justify-end">
                 <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
                     class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
@@ -133,7 +134,7 @@ const deleteSelectedItem = async () => {
                 <div v-for="item in list.items" :key="item.id"
                     class="p-4 flex gap-2 justify-between items-center border rounded cursor-pointer hover:bg-neutral-100">
                     <div class="flex flex-col gap-1">
-                        <p class="text-xl font-bold">{{ item.name }}</p>
+                        <p class="text-2xl font-bold">{{ item.name }}</p>
                         <p class="text-xs font-thin">{{ parseDate(item.createdAt).toLocaleString() }}</p>
                         <p v-if="item.description" class="whitespace-pre-line">{{ item.description }}</p>
                     </div>
