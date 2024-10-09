@@ -100,7 +100,7 @@ const deleteSelectedList = async () => {
         <h1 class="py-10 text-center mx-auto text-5xl font-bold">My Lists</h1>
         <p class="text-xl text-center mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book
             lists, music lists, etc.)</p>
-        <div class="flex gap-x-40 gap-y-4 justify-between items-center flex-wrap">
+        <div class="flex gap-x-40 gap-y-4 mt-16 justify-between items-center flex-wrap">
             <div class="flex-auto">
                 <MyListSearch :placeholder="placeholders[index]" @search="(query: string) => searchQuery = query" />
             </div>

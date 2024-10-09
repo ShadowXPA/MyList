@@ -120,7 +120,7 @@ const deleteSelectedItem = async () => {
         <div class="flex flex-col gap-4">
             <h1 class="py-10 text-center mx-auto text-5xl font-bold">{{ list.name }}</h1>
             <p v-if="list.description" class="text-xl whitespace-pre-line">{{ list.description }}</p>
-            <p class="text-sm ml-auto font-thin"><span class="font-bold">Created:</span> {{
+            <p class="text-sm mt-16 ml-auto font-thin"><span class="font-bold">Created:</span> {{
                 parseDate(list.createdAt).toLocaleString() }}
                 <span v-if="list.updatedAt"><span class="font-bold">Updated:</span> {{
                     parseDate(list.updatedAt).toLocaleString() }}</span>
