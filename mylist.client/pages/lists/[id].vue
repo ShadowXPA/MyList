@@ -4,7 +4,10 @@ const runtimeConfig = useRuntimeConfig()
 const route = useRoute()
 const id = route.params.id
 
-const { data: list, refresh, status, error } = await useFetch<UserList>(`${runtimeConfig.public.apiBaseURL}/api/lists/${id}?include-items=true`)
+const searchQuery = ref<string>('')
+const { data: list, refresh, status, error } = await useFetch<UserList>(`${runtimeConfig.public.apiBaseURL}/api/lists/${id}`, {
+    query: { q: searchQuery, 'include-items': true }
+})
 
 const newItemModal = ref(false)
 const newItem = ref<{ name: string, description?: string }>({ name: '' })
@@ -115,24 +118,29 @@ const deleteSelectedItem = async () => {
     <div v-if="list">
         <Title>{{ list.name }}</Title>
         <div class="flex flex-col gap-4">
-            <h1 class="py-10 mx-auto text-5xl font-bold">{{ list.name }}</h1>
+            <h1 class="py-10 text-center mx-auto text-5xl font-bold">{{ list.name }}</h1>
             <p v-if="list.description" class="text-xl whitespace-pre-line">{{ list.description }}</p>
             <p class="text-sm ml-auto font-thin"><span class="font-bold">Created:</span> {{
                 parseDate(list.createdAt).toLocaleString() }}
                 <span v-if="list.updatedAt"><span class="font-bold">Updated:</span> {{
                     parseDate(list.updatedAt).toLocaleString() }}</span>
             </p>
-            <div class="flex gap-2 justify-end">
-                <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
-                    class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
-                <MyListButton title="New item" icon="bi:plus-lg" @click="(e: any) => newItemModal = true"
-                    class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
-                <MyListButton title="Edit list" icon="bi:pencil" @click="(e: any) => editListModal = true"
-                    class="bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
+            <div class="flex gap-x-40 gap-y-4 justify-between items-center flex-wrap">
+                <div class="flex-auto">
+                    <MyListSearch @search="(query: string) => searchQuery = query" />
+                </div>
+                <div class="flex-auto flex gap-2 justify-end items-center flex-wrap">
+                    <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
+                        class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
+                    <MyListButton title="New item" icon="bi:plus-lg" @click="(e: any) => newItemModal = true"
+                        class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
+                    <MyListButton title="Edit list" icon="bi:pencil" @click="(e: any) => editListModal = true"
+                        class="bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
+                </div>
             </div>
             <div v-if="status === 'success'" class="flex flex-col gap-2">
                 <div v-for="item in list.items" :key="item.id"
-                    class="p-4 flex gap-2 justify-between items-center border rounded cursor-pointer hover:bg-neutral-100">
+                    class="p-4 flex gap-2 justify-between items-center border rounded hover:bg-neutral-100">
                     <div class="flex flex-col gap-1">
                         <p class="text-2xl font-bold">{{ item.name }}</p>
                         <p class="text-xs font-thin">{{ parseDate(item.createdAt).toLocaleString() }}</p>

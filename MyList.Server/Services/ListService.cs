@@ -13,14 +13,14 @@ namespace MyList.Server.Services
         private readonly ILogger<ListService> _logger = logger;
         private readonly IListRepository _listRepository = listRepository;
 
-        public async Task<IEnumerable<ListDTO>> GetListsAsync()
+        public async Task<IEnumerable<ListDTO>> GetListsAsync(string? query)
         {
-            return (await _listRepository.GetAllAsync()).ToDTO();
+            return (await _listRepository.GetAllAsync(query)).ToDTO();
         }
 
-        public async Task<ListDTO?> GetListAsync(int id, bool includeItems = false)
+        public async Task<ListDTO?> GetListAsync(int id, string? query, bool includeItems = false)
         {
-            return (await _listRepository.FindAsync(id, includeItems))?.ToDTO();
+            return (await _listRepository.FindAsync(id, query, includeItems))?.ToDTO();
         }
 
         public async Task<ListDTO?> CreateListAsync(CreateListDTO listDto)
@@ -79,9 +79,9 @@ namespace MyList.Server.Services
             _logger.LogInformation("List (ID: {}) was {}", id, (deleted ? "deleted" : "not deleted"));
         }
 
-        public async Task<IEnumerable<ItemDTO>> GetItemsAsync(int listId)
+        public async Task<IEnumerable<ItemDTO>> GetItemsAsync(int listId, string? query)
         {
-            var list = await _listRepository.FindAsync(listId, true);
+            var list = await _listRepository.FindAsync(listId, query, true);
 
             if (list == null)
             {

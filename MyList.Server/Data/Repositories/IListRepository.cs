@@ -4,8 +4,8 @@ namespace MyList.Server.Data.Repositories
 {
     public interface IListRepository
     {
-        Task<IEnumerable<UserList>> GetAllAsync();
-        Task<UserList?> FindAsync(int id, bool includeItems = false);
+        Task<IEnumerable<UserList>> GetAllAsync(string? query);
+        Task<UserList?> FindAsync(int id, string? query = null, bool includeItems = false);
         async Task<bool> ExistsAsync(int id) => (await FindAsync(id)) != null;
         Task<UserList?> InsertAsync(UserList list);
         Task<UserList?> UpdateAsync(UserList list);

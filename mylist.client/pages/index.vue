@@ -1,9 +1,26 @@
 <script lang="ts" setup>
+import MyListSearch from '~/components/MyListSearch.vue';
 import type { UserList } from '~/types/myList'
 import { parseDate } from '~/utils/dateUtils'
 
+const searchQuery = ref<string>('')
+
+const placeholders = [
+    'plan to watch...',
+    'groceries...',
+    'watched...',
+    'reading...',
+    'playing...',
+    'played...',
+    'listened...'
+]
+
+const index = randomNumber(0, placeholders.length)
+
 const runtimeConfig = useRuntimeConfig()
-const { data: lists, refresh, status, error } = await useFetch<UserList[]>(`${runtimeConfig.public.apiBaseURL}/api/lists`)
+const { data: lists, refresh, status, error } = await useFetch<UserList[]>(`${runtimeConfig.public.apiBaseURL}/api/lists`, {
+    query: { q: searchQuery }
+})
 
 const newListModal = ref(false)
 const newList = ref<{ name: string, description?: string }>({ name: '' })
@@ -78,15 +95,21 @@ const deleteSelectedList = async () => {
 </script>
 
 <template>
-    <Title>Your lists</Title>
+    <Title>My Lists</Title>
     <div class="flex flex-col gap-4">
-        <h1 class="py-10 mx-auto text-5xl font-bold">My Lists</h1>
-        <p class="text-xl mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book lists, music lists, etc.)</p>
-        <div class="flex gap-2 justify-end items-center">
-            <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
-                class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
-            <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
-                class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
+        <h1 class="py-10 text-center mx-auto text-5xl font-bold">My Lists</h1>
+        <p class="text-xl text-center mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book
+            lists, music lists, etc.)</p>
+        <div class="flex gap-x-40 gap-y-4 justify-between items-center flex-wrap">
+            <div class="flex-auto">
+                <MyListSearch :placeholder="placeholders[index]" @search="(query: string) => searchQuery = query" />
+            </div>
+            <div class="flex-auto flex gap-2 justify-end items-center flex-wrap">
+                <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
+                    class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
+                <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
+                    class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
+            </div>
         </div>
         <div v-if="status === 'success'" class="flex flex-col gap-2">
             <div v-for="list in lists" :key="list.id" @click.stop="navigateTo(`/lists/${list.id}`)"

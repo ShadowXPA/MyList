@@ -16,19 +16,23 @@ namespace MyList.Server.Controllers
         private readonly IListService _listService = listService;
 
         [HttpGet]
-        public async Task<IActionResult> GetListsAsync()
+        public async Task<IActionResult> GetListsAsync([FromQuery(Name = "q")] string? query)
         {
             _logger.LogInformation("Getting all lists...");
-            var lists = await _listService.GetListsAsync();
+            var lists = await _listService.GetListsAsync(query);
             _logger.LogInformation("Found {} lists", lists.Count());
             return Ok(lists);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetListAsync(int id, [FromQuery(Name = "include-items")] bool includeItems = false)
+        public async Task<IActionResult> GetListAsync(
+                int id,
+                [FromQuery(Name = "q")] string? query,
+                [FromQuery(Name = "include-items")] bool includeItems = false
+            )
         {
             _logger.LogInformation("Getting list (ID: {}) including items? {}...", id, includeItems);
-            var list = await _listService.GetListAsync(id, includeItems);
+            var list = await _listService.GetListAsync(id, query, includeItems);
             _logger.LogInformation("List (ID: {}) was {}", id, (list == null ? "not found" : "found"));
             return list == null ? NotFound() : Ok(list);
         }
@@ -77,10 +81,10 @@ namespace MyList.Server.Controllers
         }
 
         [HttpGet("{id}/items")]
-        public async Task<IActionResult> GetItemsAsync(int id)
+        public async Task<IActionResult> GetItemsAsync(int id, [FromQuery(Name = "q")] string? query)
         {
             _logger.LogInformation("Getting list (ID: {}) items...", id);
-            var items = await _listService.GetItemsAsync(id);
+            var items = await _listService.GetItemsAsync(id, query);
             _logger.LogInformation("Found {} items in list (ID: {})", items.Count(), id);
             return Ok(items);
         }

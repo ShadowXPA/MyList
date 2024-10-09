@@ -11,21 +11,36 @@ namespace MyList.Server.Data.Repositories
         private readonly ILogger<ListRepository> _logger = logger;
         private readonly ApplicationDbContext _db = db;
 
-        public Task<IEnumerable<UserList>> GetAllAsync()
+        public Task<IEnumerable<UserList>> GetAllAsync(string? query)
         {
-            return Task.FromResult(_db.Lists
+            var lists = _db.Lists
                 .OrderByDescending(l => l.UpdatedAt == null ? l.CreatedAt : l.UpdatedAt)
                 .ThenByDescending(l => l.CreatedAt)
-                .AsEnumerable());
+                .AsQueryable();
+
+            if (query != null)
+            {
+                lists = lists.Where(l =>
+                     l.Name!.ToUpper().Contains(query.ToUpper()) || (l.Description != null ? l.Description.ToUpper().Contains(query.ToUpper()) : false)
+                );
+            }
+
+            return Task.FromResult(lists.AsEnumerable());
         }
 
-        public Task<UserList?> FindAsync(int id, bool includeItems = false)
+        public Task<UserList?> FindAsync(int id, string? query = null, bool includeItems = false)
         {
             var lists = _db.Lists.AsQueryable();
 
             if (includeItems)
             {
-                lists = lists.Include(l => l.Items.OrderByDescending(i => i.CreatedAt));
+                lists = lists.Include(l => l.Items
+                    .OrderByDescending(i => i.CreatedAt)
+                    .Where(i =>
+                        query == null ||
+                        i.Name!.ToUpper().Contains(query.ToUpper()) ||
+                        (i.Description != null ? i.Description.ToUpper().Contains(query.ToUpper()) : false))
+                    );
             }
 
             return lists.Where(l => l.Id == id)
@@ -46,7 +61,7 @@ namespace MyList.Server.Data.Repositories
 
         public async Task<UserList?> UpdateAsync(UserList list)
         {
-            var dbList = await FindAsync(list.Id, true);
+            var dbList = await FindAsync(list.Id, includeItems: true);
 
             if (dbList == null)
             {
