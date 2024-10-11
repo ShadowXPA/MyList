@@ -174,7 +174,7 @@ const deleteSelectedItem = async () => {
         return
     }
 
-    await $fetch(`${runtimeConfig.public.apiBaseURL}/api/lists/${list.value.id}/items/${deleteItem.value.id}`, { method: 'delete' })
+    await $fetch(`${runtimeConfig.public.apiBaseURL}/api/lists/${list.value.id}/items/${currentItem.value.id}`, { method: 'delete' })
 
     list.value.items = list.value.items.filter((item) => item.id !== currentItem.value.id)
     closeDeleteItemModal()
