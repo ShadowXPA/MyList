@@ -25,7 +25,8 @@ namespace MyList.Server.Extensions
                 Id = item.Id,
                 Name = item.Name,
                 Description = item.Description,
-                CreatedAt = item.CreatedAt
+                CreatedAt = item.CreatedAt,
+                UpdatedAt = item.UpdatedAt
             };
         }
 

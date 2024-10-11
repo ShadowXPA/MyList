@@ -15,7 +15,6 @@ namespace MyList.Server.Data.Repositories
         {
             var lists = _db.Lists
                 .OrderByDescending(l => l.UpdatedAt == null ? l.CreatedAt : l.UpdatedAt)
-                .ThenByDescending(l => l.CreatedAt)
                 .AsQueryable();
 
             if (query != null)
@@ -35,7 +34,7 @@ namespace MyList.Server.Data.Repositories
             if (includeItems)
             {
                 lists = lists.Include(l => l.Items
-                    .OrderByDescending(i => i.CreatedAt)
+                    .OrderByDescending(i => i.UpdatedAt == null ? i.CreatedAt : i.UpdatedAt)
                     .Where(i =>
                         query == null ||
                         i.Name!.ToUpper().Contains(query.ToUpper()) ||
@@ -142,6 +141,11 @@ namespace MyList.Server.Data.Repositories
 
             var removed = await _db.SaveChangesAsync();
             return removed > 0;
+        }
+
+        public Task<int> SaveChangesAsync()
+        {
+            return _db.SaveChangesAsync();
         }
     }
 }

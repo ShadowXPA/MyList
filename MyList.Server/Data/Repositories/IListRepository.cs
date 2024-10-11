@@ -2,7 +2,7 @@
 
 namespace MyList.Server.Data.Repositories
 {
-    public interface IListRepository
+    public interface IListRepository : IRepository
     {
         Task<IEnumerable<UserList>> GetAllAsync(string? query);
         Task<UserList?> FindAsync(int id, string? query = null, bool includeItems = false);

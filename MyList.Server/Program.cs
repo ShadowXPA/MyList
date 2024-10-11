@@ -24,6 +24,8 @@ namespace MyList.Server
 
             builder.Services.AddScoped<IListRepository, ListRepository>();
             builder.Services.AddScoped<IListService, ListService>();
+            builder.Services.AddScoped<IItemRepository, ItemRepository>();
+            builder.Services.AddScoped<IItemService, ItemService>();
 
             var app = builder.Build();
 

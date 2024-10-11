@@ -2,7 +2,8 @@ export interface ListItem {
   id: number,
   name: string,
   description?: string,
-  createdAt: string
+  createdAt: string,
+  updatedAt?: string
 }
 
 export interface UserList {

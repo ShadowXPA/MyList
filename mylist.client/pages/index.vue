@@ -98,18 +98,20 @@ const deleteSelectedList = async () => {
     <Title>My Lists</Title>
     <div class="flex flex-col gap-4">
         <h1 class="py-10 text-center mx-auto text-5xl font-bold">My Lists</h1>
-        <p class="text-xl text-center mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book
-            lists, music lists, etc.)</p>
-        <div class="flex gap-x-40 gap-y-4 mt-16 justify-between items-center flex-wrap">
-            <div class="flex-auto">
-                <MyListSearch :placeholder="placeholders[index]" @search="(query: string) => searchQuery = query" />
+        <p class="text-xl text-center mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book lists, music lists, etc.)</p>
+        <div class="sticky bg-white top-0 py-2 z-10 mt-16 flex flex-col gap-2">
+            <div class="flex gap-x-40 gap-y-4 justify-between items-center flex-wrap">
+                <div class="flex-auto">
+                    <MyListSearch :placeholder="placeholders[index]" @search="(query: string) => searchQuery = query" />
+                </div>
+                <div class="flex-auto flex gap-2 justify-end items-center flex-wrap">
+                    <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
+                        class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
+                    <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
+                        class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
+                </div>
             </div>
-            <div class="flex-auto flex gap-2 justify-end items-center flex-wrap">
-                <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
-                    class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
-                <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
-                    class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
-            </div>
+            <div class="ml-auto text-sm text-neutral-500 font-bold">{{ lists?.length ?? 0 }} Lists</div>
         </div>
         <div v-if="status === 'success'" class="flex flex-col gap-2">
             <div v-for="list in lists" :key="list.id" @click.stop="navigateTo(`/lists/${list.id}`)"

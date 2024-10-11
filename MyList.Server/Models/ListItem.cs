@@ -10,6 +10,7 @@ namespace MyList.Server.Models
         public string? Name { get; set; }
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
         [Required]
         public UserList? List { get; set; }
     }
