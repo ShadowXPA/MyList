@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import MyListSearch from '~/components/MyListSearch.vue';
-import type { UserList } from '~/types/myList'
+import type { CurrentItem, UserList } from '~/types/myList'
 import { parseDate } from '~/utils/dateUtils'
 
 const searchQuery = ref<string>('')
@@ -12,7 +12,8 @@ const placeholders = [
     'reading...',
     'playing...',
     'played...',
-    'listened...'
+    'listened...',
+    'to-do...'
 ]
 
 const index = randomNumber(0, placeholders.length)
@@ -22,33 +23,29 @@ const { data: lists, refresh, status, error } = await useFetch<UserList[]>(`${ru
     query: { q: searchQuery }
 })
 
+const selectedList = ref<CurrentItem>({ id: 0, item: { name: '' } })
+
 const newListModal = ref(false)
-const newList = ref<{ name: string, description?: string }>({ name: '' })
 const deleteListModal = ref(false)
-const deleteList = ref<{ id: number, name: string }>({ id: 0, name: '' })
 const errorModal = ref(false)
 const errorMsg = ref<string>()
 
-const onCloseNewListModal = () => {
-    newList.value.name = ''
-    newList.value.description = undefined
+const resetSelectedList = () => {
+    selectedList.value.id = 0
+    selectedList.value.item.name = ''
+    selectedList.value.item.description = undefined
 }
 
-const closeNewListModal = () => {
-    newListModal.value = false
-    onCloseNewListModal()
-}
-
-const addNewList = async () => {
+const createNewList = async (newList: { name: string, description?: string }) => {
     if (!lists.value) {
-        closeNewListModal()
+        newListModal.value = false
         return
     }
 
     const data = await $fetch<UserList>(`${runtimeConfig.public.apiBaseURL}/api/lists`,
         {
             method: 'post',
-            body: newList.value
+            body: newList
         }
     ).catch((error) => {
         let msg = `An error occured while adding new list:\n(${error.data.status}) ${error.data.title}\n`
@@ -67,60 +64,43 @@ const addNewList = async () => {
         return
 
     lists.value.unshift(data)
-    closeNewListModal()
-}
-
-const onCloseDeleteListModal = () => {
-    deleteList.value.id = 0
-    deleteList.value.name = ''
-}
-
-const closeDeleteListModal = () => {
-    deleteListModal.value = false
-    onCloseDeleteListModal()
+    newListModal.value = false
 }
 
 const deleteSelectedList = async () => {
     if (!lists.value) {
-        closeDeleteListModal()
+        deleteListModal.value = false
         return
     }
 
-    await $fetch(`${runtimeConfig.public.apiBaseURL}/api/lists/${deleteList.value.id}`, { method: 'delete' })
+    await $fetch(`${runtimeConfig.public.apiBaseURL}/api/lists/${selectedList.value.id}`, { method: 'delete' })
 
-    lists.value = lists.value.filter((list) => list.id !== deleteList.value.id)
-
-    closeDeleteListModal()
+    lists.value = lists.value.filter((list) => list.id !== selectedList.value.id)
+    deleteListModal.value = false
 }
 </script>
 
 <template>
     <Title>My Lists</Title>
     <div class="flex flex-col gap-4">
-        <h1 class="py-10 text-center mx-auto text-5xl font-bold">My Lists</h1>
-        <p class="text-xl text-center mx-auto whitespace-pre-line">Create and edit your own lists (to-do lists, movie lists, book lists, music lists, etc.)</p>
-        <div class="sticky bg-white top-0 py-2 z-10 mt-16 flex flex-col gap-2">
-            <div class="flex gap-x-40 gap-y-4 justify-between items-center flex-wrap">
-                <div class="flex-auto">
-                    <MyListSearch :placeholder="placeholders[index]" @search="(query: string) => searchQuery = query" />
-                </div>
-                <div class="flex-auto flex gap-2 justify-end items-center flex-wrap">
-                    <MyListButton title="Refresh" icon="bi:arrow-counterclockwise" @click="refresh"
-                        class="bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
-                    <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
-                        class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
-                </div>
-            </div>
-            <div class="ml-auto text-sm text-neutral-500 font-bold">{{ lists?.length ?? 0 }} Lists</div>
-        </div>
-        <div v-if="status === 'success'" class="flex flex-col gap-2">
+        <MyListTitle title="My Lists"
+            description="Create and edit your own lists (to-do lists, movie lists, book lists, music lists, etc.)" />
+        <MyListSearchBar :placeholder="placeholders[index]" title="Lists" :num-items="lists?.length" @refresh="refresh"
+            @search="(query: string) => searchQuery = query">
+            <template #actions>
+                <MyListButton title="New list" icon="bi:plus-lg" @click="(e: any) => newListModal = true"
+                    class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
+            </template>
+        </MyListSearchBar>
+        <div v-if="status === 'success' || status === 'pending'" class="flex flex-col gap-2">
+            <div v-if="status === 'pending'" class="mx-auto font-bold">Loading...</div>
             <div v-for="list in lists" :key="list.id" @click.stop="navigateTo(`/lists/${list.id}`)"
                 class="p-4 flex gap-2 justify-between items-center border rounded cursor-pointer hover:bg-neutral-100 active:bg-neutral-200">
                 <div class="flex flex-col gap-1 max-w-[calc(100%-4rem)] overflow-auto">
                     <p class="text-2xl font-bold">{{ list.name }}</p>
                     <p class="text-xs font-thin">
                         {{ parseDate(list.createdAt).toLocaleString() }}
-                        <span v-if="list.updatedAt"> - {{ parseDate(list.updatedAt).toLocaleString() }}</span>
+                        <template v-if="list.updatedAt"> - {{ parseDate(list.updatedAt).toLocaleString() }}</template>
                     </p>
                     <p v-if="list.description" class="text-ellipsis overflow-hidden whitespace-nowrap">
                         {{ list.description }}
@@ -128,66 +108,24 @@ const deleteSelectedList = async () => {
                 </div>
                 <div class="flex flex-col gap-2 justify-end items-center flex-wrap">
                     <MyListButton icon="bi:trash" @click="(e: any) => {
-                        deleteList.id = list.id
-                        deleteList.name = list.name
+                        selectedList.id = list.id
+                        selectedList.item.name = list.name
+                        selectedList.item.description = list.description
                         deleteListModal = true
                     }" class="bg-red-100 hover:bg-red-200 active:bg-red-300" />
                 </div>
             </div>
         </div>
         <div v-else-if="status === 'idle'">Idle</div>
-        <div v-else-if="status === 'pending'" class="mx-auto font-bold">Loading...</div>
         <div v-else-if="status === 'error' && error">
             <span class="text-red-500 font-bold">An error occured:</span> ({{ error.statusCode }}) {{ error.message }}
         </div>
     </div>
 
-    <MyListModal v-model="newListModal" @closed="onCloseNewListModal" static>
-        <template #header>
-            <p class="text-lg font-bold">Add a new list</p>
-        </template>
+    <CreateItemModal v-model="newListModal" @create="createNewList" />
 
-        <div class="flex flex-col gap-4">
-            <div>
-                <label for="list-name">Name:</label>
-                <input id="list-name" name="name" v-model="newList.name" type="text"
-                    class="mt-1 block w-full border rounded shadow-sm focus:border-gray-500 focus:ring focus:ring-sky-300 focus:ring-opacity-50" />
-            </div>
-            <div>
-                <label for="list-description">Description:</label>
-                <textarea id="list-description" name="description" v-model="newList.description" type="text"
-                    class="transition-none mt-1 block w-full border rounded shadow-sm focus:border-gray-500 focus:ring focus:ring-sky-300 focus:ring-opacity-50"></textarea>
-            </div>
-        </div>
+    <DeleteModal v-model="deleteListModal" :name="selectedList.item.name" @closed="resetSelectedList"
+        @delete="deleteSelectedList" />
 
-        <template #footer>
-            <MyListButton title="Cancel" @click="closeNewListModal"
-                class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
-            <MyListButton title="Add" @click="addNewList"
-                class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
-        </template>
-    </MyListModal>
-
-    <MyListModal v-model="deleteListModal" @closed="onCloseDeleteListModal" static>
-        <template #header>
-            <p class="text-lg font-bold">Deleting "{{ deleteList.name }}"</p>
-        </template>
-
-        <div>Are you sure you want to delete "{{ deleteList.name }}"?</div>
-
-        <template #footer>
-            <MyListButton title="Cancel" @click="closeDeleteListModal"
-                class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
-            <MyListButton title="Delete" @click="deleteSelectedList"
-                class="bg-red-100 hover:bg-red-200 active:bg-red-300" />
-        </template>
-    </MyListModal>
-
-    <MyListModal v-model="errorModal">
-        <template #header>
-            <p class="text-lg font-bold">Error!</p>
-        </template>
-
-        <div class="font-bold text-red-500 whitespace-pre-line">{{ errorMsg }}</div>
-    </MyListModal>
+    <ErrorModal v-model="errorModal" :message="errorMsg" />
 </template>
