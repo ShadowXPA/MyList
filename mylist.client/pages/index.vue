@@ -116,7 +116,7 @@ const deleteSelectedList = async () => {
         <div v-if="status === 'success'" class="flex flex-col gap-2">
             <div v-for="list in lists" :key="list.id" @click.stop="navigateTo(`/lists/${list.id}`)"
                 class="p-4 flex gap-2 justify-between items-center border rounded cursor-pointer hover:bg-neutral-100 active:bg-neutral-200">
-                <div class="flex flex-col gap-1 max-w-[calc(100%-4rem)]">
+                <div class="flex flex-col gap-1 max-w-[calc(100%-4rem)] overflow-auto">
                     <p class="text-2xl font-bold">{{ list.name }}</p>
                     <p class="text-xs font-thin">
                         {{ parseDate(list.createdAt).toLocaleString() }}
@@ -126,7 +126,7 @@ const deleteSelectedList = async () => {
                         {{ list.description }}
                     </p>
                 </div>
-                <div>
+                <div class="flex flex-col gap-2 justify-end items-center flex-wrap">
                     <MyListButton icon="bi:trash" @click="(e: any) => {
                         deleteList.id = list.id
                         deleteList.name = list.name
@@ -161,8 +161,10 @@ const deleteSelectedList = async () => {
         </div>
 
         <template #footer>
+            <MyListButton title="Cancel" @click="closeNewListModal"
+                class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
             <MyListButton title="Add" @click="addNewList"
-                class="ml-auto bg-green-100 hover:bg-green-200 active:bg-green-300" />
+                class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
         </template>
     </MyListModal>
 

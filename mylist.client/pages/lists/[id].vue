@@ -186,7 +186,9 @@ const deleteSelectedItem = async () => {
         <Title>{{ list.name }}</Title>
         <div class="flex flex-col gap-4">
             <h1 class="py-10 text-center mx-auto text-5xl font-bold">{{ list.name }}</h1>
-            <p v-if="list.description" class="text-xl whitespace-pre-line">{{ list.description }}</p>
+            <p v-if="list.description" class="text-xl text-center mx-auto whitespace-pre-line">
+                {{ list.description }}
+            </p>
             <p class="text-sm mt-16 font-thin flex gap-2 flex-wrap justify-end items-center">
                 <span class="whitespace-nowrap">
                     <span class="font-bold">Created:</span> {{ parseDate(list.createdAt).toLocaleString() }}
@@ -214,7 +216,7 @@ const deleteSelectedItem = async () => {
             <div v-if="status === 'success'" class="flex flex-col gap-2">
                 <div v-for="item in list.items" :key="item.id"
                     class="p-4 flex gap-2 justify-between items-center border rounded hover:bg-neutral-100">
-                    <div class="flex flex-col gap-1">
+                    <div class="flex flex-col gap-1 max-w-[calc(100%-4rem)] overflow-auto">
                         <p class="text-2xl font-bold">{{ item.name }}</p>
                         <p class="text-xs font-thin">
                             {{ parseDate(item.createdAt).toLocaleString() }}
@@ -222,7 +224,7 @@ const deleteSelectedItem = async () => {
                         </p>
                         <p v-if="item.description" class="whitespace-pre-line">{{ item.description }}</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-col gap-2 justify-end items-center flex-wrap">
                         <MyListButton icon="bi:arrow-left-right" @click="(e: any) => {
                             currentItem.id = item.id
                             currentItem.name = item.name
@@ -270,8 +272,10 @@ const deleteSelectedItem = async () => {
             </div>
 
             <template #footer>
+                <MyListButton title="Cancel" @click="closeNewItemModal"
+                    class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
                 <MyListButton title="Add" @click="addNewItem"
-                    class="ml-auto bg-green-100 hover:bg-green-200 active:bg-green-300" />
+                    class="bg-green-100 hover:bg-green-200 active:bg-green-300" />
             </template>
         </MyListModal>
 
@@ -294,8 +298,10 @@ const deleteSelectedItem = async () => {
             </div>
 
             <template #footer>
+                <MyListButton title="Cancel" @click="closeEditListModal"
+                    class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
                 <MyListButton title="Save" @click="editCurrentList"
-                    class="ml-auto bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
+                    class="bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
             </template>
         </MyListModal>
 
@@ -318,8 +324,10 @@ const deleteSelectedItem = async () => {
             </div>
 
             <template #footer>
+                <MyListButton title="Cancel" @click="closeEditItemModal"
+                    class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
                 <MyListButton title="Save" @click="editCurrentItem"
-                    class="ml-auto bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
+                    class="bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
             </template>
         </MyListModal>
 
@@ -338,7 +346,9 @@ const deleteSelectedItem = async () => {
                     <template v-if="listsStatus === 'success'">
                         <option selected disabled value="0">Select new List</option>
                         <template v-for="newList in lists">
-                            <option v-if="newList.id !== list.id" :key="newList.id" :value="newList.id">{{ newList.name }}</option>
+                            <option v-if="newList.id !== list.id" :key="newList.id" :value="newList.id">
+                                {{ newList.name }}
+                            </option>
                         </template>
                     </template>
                     <template v-else>
@@ -348,8 +358,10 @@ const deleteSelectedItem = async () => {
             </div>
 
             <template #footer>
+                <MyListButton title="Cancel" @click="closeMoveItemModal"
+                    class="ml-auto bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300" />
                 <MyListButton title="Move" @click="moveCurrentItem"
-                    class="ml-auto bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
+                    class="bg-sky-100 hover:bg-sky-200 active:bg-sky-300" />
             </template>
         </MyListModal>
 
