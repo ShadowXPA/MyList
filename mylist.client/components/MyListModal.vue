@@ -15,7 +15,7 @@ const backdropClose = () => {
     <Body v-if="shown" class="overflow-hidden" />
     <Teleport to="#teleports">
         <Transition name="slide">
-            <div v-if="shown" class="modal fixed w-full h-full overflow-auto backdrop-brightness-50 left-0 top-0 z-[1055]"
+            <div v-if="shown" class="modal fixed w-full h-full overflow-auto bg-black/50 left-0 top-0 z-[1055]"
                 @click.self="backdropClose">
                 <div class="modal-dialog relative max-w-xl my-10 mx-4 sm:mx-auto">
                     <div class="modal-content bg-white rounded shadow-lg">
