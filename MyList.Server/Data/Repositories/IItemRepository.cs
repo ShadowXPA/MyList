@@ -1,5 +1,4 @@
-﻿using MyList.Server.DTOs;
-using MyList.Server.Models;
+﻿using MyList.Server.Models;
 
 namespace MyList.Server.Data.Repositories
 {

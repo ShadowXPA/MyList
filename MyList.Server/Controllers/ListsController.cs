@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyList.Server.DTOs;
-using MyList.Server.Models;
 using MyList.Server.Services;
 
 namespace MyList.Server.Controllers

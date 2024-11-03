@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyList.Server.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MyList.Server.Data.Repositories
 {
