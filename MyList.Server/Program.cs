@@ -20,6 +20,10 @@ namespace MyList.Server
 
             var connectionString = builder.Configuration.GetConnectionString("MyList");
 
+            var searchEngineUri = builder.Configuration.GetValue<string>("SearchEngineUri");
+
+            builder.Services.AddHttpClient("SearchEngine", config => config.BaseAddress = new Uri(searchEngineUri ?? string.Empty));
+
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
 
             builder.Services.AddScoped<IListRepository, ListRepository>();

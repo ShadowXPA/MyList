@@ -7,20 +7,37 @@ namespace MyList.Server.Services
 {
     public class ListService(
         ILogger<ListService> logger,
-        IListRepository listRepository
+        IListRepository listRepository,
+        IHttpClientFactory httpClientFactory
         ) : IListService
     {
         private readonly ILogger<ListService> _logger = logger;
         private readonly IListRepository _listRepository = listRepository;
+        private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
         public async Task<IEnumerable<ListDTO>> GetListsAsync(string? query)
         {
-            return (await _listRepository.GetAllAsync(query)).ToDTO();
+            if (query != null)
+            {
+                var httpClient = _httpClientFactory.CreateClient("SearchEngine");
+                var ids = await httpClient.GetFromJsonAsync<IList<int>>($"/api/search/lists?q=${Uri.EscapeDataString(query)}");
+                return (await _listRepository.GetAllAsync(ids)).ToDTO();
+            }
+
+            return (await _listRepository.GetAllAsync()).ToDTO();
         }
 
         public async Task<ListDTO?> GetListAsync(int id, string? query, bool includeItems = false)
         {
-            return (await _listRepository.FindAsync(id, query, includeItems))?.ToDTO();
+            IList<int>? ids = null;
+
+            if (includeItems && query != null)
+            {
+                var httpClient = _httpClientFactory.CreateClient("SearchEngine");
+                ids = await httpClient.GetFromJsonAsync<IList<int>>($"/api/search/items?q=${Uri.EscapeDataString(query)}");
+            }
+
+            return (await _listRepository.FindAsync(id, ids, includeItems))?.ToDTO();
         }
 
         public async Task<ListDTO?> CreateListAsync(CreateListDTO listDto)
@@ -81,7 +98,15 @@ namespace MyList.Server.Services
 
         public async Task<IEnumerable<ItemDTO>> GetItemsAsync(int listId, string? query)
         {
-            var list = await _listRepository.FindAsync(listId, query, true);
+            IList<int>? ids = null;
+
+            if (query != null)
+            {
+                var httpClient = _httpClientFactory.CreateClient("SearchEngine");
+                ids = await httpClient.GetFromJsonAsync<IList<int>>($"/api/search/items?q=${Uri.EscapeDataString(query)}");
+            }
+
+            var list = await _listRepository.FindAsync(listId, ids, true);
 
             if (list == null)
             {
