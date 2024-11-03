@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyList.Server.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MyList.Server.Data.Repositories
 {
@@ -11,39 +12,47 @@ namespace MyList.Server.Data.Repositories
         private readonly ILogger<ListRepository> _logger = logger;
         private readonly ApplicationDbContext _db = db;
 
-        public Task<IEnumerable<UserList>> GetAllAsync(string? query)
+        public Task<IEnumerable<UserList>> GetAllAsync(IList<int>? ids = null)
         {
-            var lists = _db.Lists
-                .OrderByDescending(l => l.UpdatedAt == null ? l.CreatedAt : l.UpdatedAt)
-                .AsQueryable();
-
-            if (query != null)
+            if (ids == null)
             {
-                lists = lists.Where(l =>
-                     l.Name!.ToUpper().Contains(query.ToUpper()) || (l.Description != null ? l.Description.ToUpper().Contains(query.ToUpper()) : false)
-                );
+                return Task.FromResult(_db.Lists
+                    .OrderByDescending(l => l.UpdatedAt == null ? l.CreatedAt : l.UpdatedAt)
+                    .AsEnumerable());
             }
 
-            return Task.FromResult(lists.AsEnumerable());
+            return Task.FromResult(_db.Lists
+                .Where(l => ids.Contains(l.Id))
+                    .AsEnumerable()
+                    .OrderBy(l => ids.IndexOf(l.Id))
+                    .AsEnumerable());
         }
 
-        public Task<UserList?> FindAsync(int id, string? query = null, bool includeItems = false)
+        public async Task<UserList?> FindAsync(int id, IList<int>? ids = null, bool includeItems = false)
         {
-            var lists = _db.Lists.AsQueryable();
+            var lists = _db.Lists.Where(l => l.Id == id).AsQueryable();
 
             if (includeItems)
             {
-                lists = lists.Include(l => l.Items
-                    .OrderByDescending(i => i.UpdatedAt == null ? i.CreatedAt : i.UpdatedAt)
-                    .Where(i =>
-                        query == null ||
-                        i.Name!.ToUpper().Contains(query.ToUpper()) ||
-                        (i.Description != null ? i.Description.ToUpper().Contains(query.ToUpper()) : false))
-                    );
+                if (ids != null)
+                {
+                    var list = await lists.Include(l => l.Items.Where(i => ids.Contains(i.Id))).FirstOrDefaultAsync();
+
+                    if (list != null)
+                    {
+                        list.Items = list.Items.OrderBy(i => ids.IndexOf(i.Id)).ToList();
+                    }
+
+                    return list;
+                }
+                else
+                {
+                    lists = lists.Include(l => l.Items
+                        .OrderByDescending(i => i.UpdatedAt == null ? i.CreatedAt : i.UpdatedAt));
+                }
             }
 
-            return lists.Where(l => l.Id == id)
-                .FirstOrDefaultAsync();
+            return await lists.FirstOrDefaultAsync();
         }
 
         public Task<bool> ExistsAsync(int id)
