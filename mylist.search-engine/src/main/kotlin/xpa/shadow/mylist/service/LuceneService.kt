@@ -32,8 +32,8 @@ class LuceneService(
     @Value("\${xpa.lucene-search.max-hits:100}")
     private val maxHits = 100
 
-    @Value("\${xpa.lucene-search.min-score:1.0f}")
-    private val minScore = 1.0f
+    @Value("\${xpa.lucene-search.min-score:0.3f}")
+    private val minScore = 0.3f
 
     fun indexList(userList: UserListDto) {
         val writer = IndexWriter(luceneDirectory, IndexWriterConfig(luceneAnalyzer))
