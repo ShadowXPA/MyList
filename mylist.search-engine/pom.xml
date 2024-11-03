@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
-		<kotlin.version>1.7.10</kotlin.version>
+		<kotlin.version>1.9.25</kotlin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -113,6 +113,7 @@
 						<arg>-Xjsr305=strict</arg>
 					</args>
 					<compilerPlugins>
+						<plugin>all-open</plugin>
 						<plugin>spring</plugin>
 						<plugin>jpa</plugin>
 					</compilerPlugins>
