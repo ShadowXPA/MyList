@@ -32,6 +32,18 @@ services:
     # ports:
     #   - "3000:3000"  # Expose the app's port if needed for local dev
 
+  mylist-search-engine:
+    build:
+      context: ./mylist.search-engine
+    container_name: mylist-search-engine
+    restart: always
+    networks:
+      - mylist-network
+    volumes:
+      - ./data/mylist.db:/app/mylist.db
+    # ports:
+    #   - "8080:8080"  # Expose the app's port if needed for local dev
+
 networks:
   mylist-network:
     driver: bridge
