@@ -1,26 +1,44 @@
-# Use the official Node.js image as the base image
-FROM node:20
+FROM node:20-alpine AS base
 
-# Set the working directory
-WORKDIR /usr/src/app
+FROM base AS deps
+WORKDIR /app
 
-# Copy the package.json and package-lock.json (if available)
-COPY package*.json .
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
-# Install app dependencies
-RUN npm install --production
-
-# Copy the rest of the application code
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Override runtime config
-ENV API_BASE_URL=http://mylist-server:8080/mylist-api/**
+RUN \
+  if [ -f yarn.lock ]; then yarn run build; \
+  elif [ -f package-lock.json ]; then npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
-# Expose the port that your app runs on
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nuxt
+
+# Copy built output to app directory
+COPY --from=builder --chown=nuxt:nodejs /app/.output ./
+
+USER nuxt
+
 EXPOSE 3000
 
-# Build the application for production
-RUN npm run build
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Define the command to run your app
-CMD ["node", ".output/server/index.mjs"]
+CMD ["node", "./server/index.mjs"]
