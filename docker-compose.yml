@@ -29,6 +29,8 @@ services:
     restart: always
     networks:
       - mylist-network
+    environment:
+      - API_BASE_URL=http://mylist-server:8080/mylist-api/**
     # ports:
     #   - "3000:3000"  # Expose the app's port if needed for local dev
 
